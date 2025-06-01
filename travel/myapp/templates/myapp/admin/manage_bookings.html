@@ -1,0 +1,70 @@
+{% extends 'myapp/admin/base.html' %}
+{% load static %}
+
+{% block title %}Manage Bookings{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Manage Bookings</h1>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Package</th>
+                            <th>Booking Date</th>
+                            <th>Travel Date</th>
+                            <th>Guests</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td>{{ booking.id }}</td>
+                            <td>{{ booking.user.username }}</td>
+                            <td>{{ booking.package.name }}</td>
+                            <td>{{ booking.booking_date|date:"M d, Y" }}</td>
+                            <td>{{ booking.travel_date|date:"M d, Y" }}</td>
+                            <td>{{ booking.guests }}</td>
+                            <td>
+                                <form method="post" action="{% url 'update_booking_status' booking.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <select name="status" class="form-select form-select-sm d-inline w-auto" onchange="this.form.submit()">
+                                        {% for value, label in booking.STATUS_CHOICES %}
+                                            <option value="{{ value }}" {% if booking.status == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                                <span class="badge 
+                                    {% if booking.status == 'confirmed' %}bg-success
+                                    {% elif booking.status == 'cancelled' %}bg-danger
+                                    {% elif booking.status == 'completed' %}bg-info
+                                    {% else %}bg-warning{% endif %}">
+                                    {{ booking.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'update_booking' booking.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a href="{% url 'delete_booking' booking.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">No bookings found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

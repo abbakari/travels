@@ -1,0 +1,82 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - TravelEase{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if user.profile_image %}
+                        <img src="{{ user.profile_image.url }}" alt="User Avatar" class="rounded-circle mb-3" width="100" height="100" style="object-fit:cover;">
+                    {% else %}
+                        <img src="{% static 'images/user-avatar.png' %}" alt="User Avatar" class="rounded-circle mb-3" width="100">
+                    {% endif %}
+                    <h5>{{ user.username }}</h5>
+                    <p class="text-muted">{{ user.email }}</p>
+                    <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-sm">Edit Profile</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-9">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Your Bookings</h5>
+                </div>
+                <div class="card-body">
+                    {% if bookings %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Package</th>
+                                    <th>Booking Date</th>
+                                    <th>Travel Date</th>
+                                    <th>Guests</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in bookings %}
+                                <tr>
+                                    <td>{{ booking.package.name }}</td>
+                                    <td>{{ booking.booking_date|date:"M d, Y" }}</td>
+                                    <td>{{ booking.travel_date|date:"M d, Y" }}</td>
+                                    <td>{{ booking.guests }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if booking.status == 'confirmed' %}bg-success
+                                            {% elif booking.status == 'cancelled' %}bg-danger
+                                            {% elif booking.status == 'completed' %}bg-info
+                                            {% else %}bg-warning{% endif %}">
+                                            {{ booking.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'view_booking' booking.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                                        {% if booking.status == 'pending' or booking.status == 'confirmed' %}
+                                        <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-sm btn-outline-danger">Cancel</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <img src="{% static 'images/no-bookings.svg' %}" alt="No bookings" width="200" class="mb-3">
+                        <h5>You don't have any bookings yet</h5>
+                        <p>Explore our packages and start your journey!</p>
+                        <a href="{% url 'packages' %}" class="btn btn-primary">Browse Packages</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

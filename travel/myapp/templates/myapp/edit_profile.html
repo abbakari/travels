@@ -1,0 +1,40 @@
+{% extends 'myapp/base.html' %}
+{% block title %}Edit Profile{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="mb-4 text-center">Edit Profile</h2>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.non_field_errors }}
+                        {% if user.profile_image %}
+                            <div class="mb-3 text-center">
+                                <img src="{{ user.profile_image.url }}" alt="Profile Image" class="rounded-circle mb-2" width="120" height="120" style="object-fit:cover;">
+                                <div class="form-text">Current profile image</div>
+                            </div>
+                        {% endif %}
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

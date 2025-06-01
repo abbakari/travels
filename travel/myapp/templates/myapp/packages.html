@@ -1,0 +1,129 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Travel Packages - TravelEase{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <h1 class="text-center mb-5">Our Travel Packages</h1>
+        <div class="row mb-4">
+            <div class="col-md-6 mx-auto">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search packages..." id="packageSearch">
+                    <button class="btn btn-primary" type="button">Search</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row" id="packageContainer">
+            {% for package in packages %}
+            <div class="col-lg-4 col-md-6 mb-4 package-item">
+                <div class="card package-card h-100">
+                    <img src="{{ package.image.url }}" class="card-img-top" alt="{{ package.name }}">
+                    <div class="price-badge">${{ package.price }}</div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ package.name }}</h5>
+                        <p class="card-text">{{ package.description|truncatewords:25 }}</p>
+                        <p class="text-muted"><i class="fas fa-clock me-2"></i> {{ package.duration }}</p>
+                        <div class="mb-3">
+                            {% for destination in package.destinations.all %}
+                            <span class="badge bg-secondary me-1">{{ destination.name }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-top-0">
+                        {% if user.is_authenticated %}
+                        <button class="btn btn-primary book-btn" data-package-id="{{ package.id }}">Book Now</button>
+                        {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-primary">Login to Book</a>
+                        {% endif %}
+                        <a href="#" class="btn btn-outline-secondary ms-2">Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Booking Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Book Package</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="bookingForm" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="package_id" id="packageId">
+                    <div class="mb-3">
+                        <label for="travelDate" class="form-label">Travel Date</label>
+                        <input type="date" class="form-control" id="travelDate" name="travel_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="guests" class="form-label">Number of Guests</label>
+                        <input type="number" class="form-control" id="guests" name="guests" min="1" value="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="specialRequests" class="form-label">Special Requests</label>
+                        <textarea class="form-control" id="specialRequests" name="special_requests" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="confirmBooking">Confirm Booking</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Package search functionality
+    const packageSearch = document.getElementById('packageSearch');
+    const packageItems = document.querySelectorAll('.package-item');
+    
+    packageSearch.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        packageItems.forEach(item => {
+            const packageName = item.querySelector('.card-title').textContent.toLowerCase();
+            const packageDesc = item.querySelector('.card-text').textContent.toLowerCase();
+            
+            if (packageName.includes(searchTerm) || packageDesc.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+    
+    // Booking modal functionality
+    const bookButtons = document.querySelectorAll('.book-btn');
+    const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
+    const packageIdInput = document.getElementById('packageId');
+    
+    bookButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const packageId = this.getAttribute('data-package-id');
+            packageIdInput.value = packageId;
+            bookingModal.show();
+        });
+    });
+    
+    // Confirm booking
+    const confirmBookingBtn = document.getElementById('confirmBooking');
+    confirmBookingBtn.addEventListener('click', function() {
+        const bookingForm = document.getElementById('bookingForm');
+        bookingForm.action = "{% url 'create_booking' %}";
+        bookingForm.submit();
+    });
+});
+</script>
+{% endblock %}

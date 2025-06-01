@@ -1,0 +1,29 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Destinations{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4 text-center">Destinations</h1>
+    <div class="row">
+        {% for destination in destinations %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if destination.image %}
+                <img src="{{ destination.image.url }}" class="card-img-top" alt="{{ destination.name }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ destination.name }}</h5>
+                    <p class="card-text">{{ destination.description|truncatewords:25 }}</p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <p>No destinations found.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

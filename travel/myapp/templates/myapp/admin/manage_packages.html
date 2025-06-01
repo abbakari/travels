@@ -1,0 +1,82 @@
+{% extends 'myapp/admin/base.html' %}
+{% load static %}
+
+{% block title %}Manage Packages{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Manage Packages</h1>
+        <a href="{% url 'add_package' %}" class="btn btn-primary">Add Package</a>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Duration</th>
+                            <th>Destinations</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for package in packages %}
+                        <tr id="package-row-{{ package.id }}">
+                            <td>{{ package.id }}</td>
+                            <td>{{ package.name }}</td>
+                            <td>${{ package.price }}</td>
+                            <td>{{ package.duration }}</td>
+                            <td>
+                                {% for destination in package.destinations.all %}
+                                <span class="badge bg-secondary me-1">{{ destination.name }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <a href="{% url 'edit_package' package.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <button class="btn btn-sm btn-outline-danger delete-package-btn" data-id="{{ package.id }}">Delete</button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4">No packages found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.delete-package-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Are you sure you want to delete this package?')) {
+                const packageId = this.getAttribute('data-id');
+                fetch(`{% url 'delete_package' 0 %}`.replace('0', packageId), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        document.getElementById('package-row-' + packageId).remove();
+                    } else {
+                        alert('Failed to delete package.');
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

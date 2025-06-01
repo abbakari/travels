@@ -1,0 +1,24 @@
+{% extends 'myapp/base.html' %}
+{% block title %}Booking Details{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Booking Details</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Package:</strong> {{ booking.package.name }}</p>
+                    <p><strong>Booking Date:</strong> {{ booking.booking_date|date:"M d, Y H:i" }}</p>
+                    <p><strong>Travel Date:</strong> {{ booking.travel_date|date:"M d, Y" }}</p>
+                    <p><strong>Guests:</strong> {{ booking.guests }}</p>
+                    <p><strong>Status:</strong> {{ booking.get_status_display }}</p>
+                    <p><strong>Special Requests:</strong> {{ booking.special_requests|default:'None' }}</p>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
